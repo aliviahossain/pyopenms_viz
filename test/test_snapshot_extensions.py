@@ -14,6 +14,12 @@ bokeh_compare = BokehSnapshotExtension.compare_json
 plotly_compare = PlotlySnapshotExtension.compare_json
 
 
+@pytest.fixture(autouse=True)
+def load_backend():
+    """Override the conftest fixture: these tests do not depend on the plotting backend"""
+    yield
+
+
 @pytest.mark.parametrize("compare", [bokeh_compare, plotly_compare])
 @pytest.mark.parametrize(
     "json1, json2, expected",
