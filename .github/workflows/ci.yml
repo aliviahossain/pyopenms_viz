@@ -27,5 +27,21 @@ jobs:
         pip install -r requirements.txt # visual tests are very finiky so fix the versions
         pip install . # install pyopenms-viz
     - name: Test
+      id: test
       run: |
         python -m pytest --snapshot-warn-unused test/ # do not fail if unused snapshot, just warn
+    # if snapshot tests fail, upload the regenerated snapshots so they can be reviewed (only once per run)
+    - name: Regenerate snapshots
+      id: regenerate
+      if: failure() && steps.test.conclusion == 'failure' && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+      run: |
+        python -m pytest --snapshot-update test/ || true
+        python .github/workflows/scripts/collect_snapshot_changes.py --out snapshot-changes
+    - name: Upload regenerated snapshots
+      if: failure() && steps.regenerate.conclusion == 'success'
+      uses: actions/upload-artifact@v4
+      with:
+        name: regenerated-snapshots-${{ github.event.pull_request.number || github.sha }}
+        path: snapshot-changes/
+        if-no-files-found: ignore
+        retention-days: 30

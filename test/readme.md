@@ -12,10 +12,12 @@ Sometimes with version updates snapshots need to be updated. The best way to do 
 
 ```bash
 # from main directory 
-mv tests/__snapshots__ tests/__snapshots_OLD 
+mv test/__snapshots__ test/__snapshots_OLD 
 pytest --snapshot-update
 ```
 
 There will then be two folders of snapshots which can be visually compared. For visual comparison it is recommended to use the notebooks in the `nbs/` folder.
+
+When snapshot tests fail in CI (for example on a dependency update PR), the ubuntu / Python 3.12 job regenerates the snapshots and uploads the changed ones as a `regenerated-snapshots-<PR number>` artifact on the workflow run. The artifact contains the changed snapshot files at their repository paths and, for matplotlib, old | new | changed pixels images for visual review.
 
 Happy testing!
